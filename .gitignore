@@ -1,0 +1,13 @@
+# /
+**/target
+target
+/.classpath
+**/.settings
+**/.project
+*.project
+*.classpath
+.settings
+*.pmd
+*.checkstyle
+.releaseBackup
+release.properties

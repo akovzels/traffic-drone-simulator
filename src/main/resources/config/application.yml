@@ -1,0 +1,12 @@
+
+dron:
+  cruising.speed: 5.0
+  station.distance.threshold: 350.0
+
+logging:
+  level:
+    org:
+      springframework: info
+      hibernate: info
+      trafficdrone: debug
+      
