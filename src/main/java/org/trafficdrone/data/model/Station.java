@@ -1,4 +1,4 @@
-package org.trafficdrone.data;
+package org.trafficdrone.data.model;
 
 import org.trafficdrone.Position;
 

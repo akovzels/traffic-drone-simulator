@@ -1,4 +1,4 @@
-package org.trafficdrone.exchange.report;
+package org.trafficdrone.report;
 
 import java.time.LocalDateTime;
 

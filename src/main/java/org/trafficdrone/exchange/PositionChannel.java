@@ -1,5 +1,6 @@
-package org.trafficdrone.exchange.postion;
+package org.trafficdrone.exchange;
 
+import org.trafficdrone.data.model.DronePosition;
 import org.trafficdrone.drone.Drone;
 
 public class PositionChannel {
@@ -14,7 +15,7 @@ public class PositionChannel {
 		return drone.getId();
 	}
 	
-	public void sendPosition(PositionRequest position) {
+	public void sendPosition(DronePosition position) {
 		drone.receivePosition(position);
 	}
 

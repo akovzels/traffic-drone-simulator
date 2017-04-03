@@ -14,11 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.trafficdrone.Position;
-import org.trafficdrone.data.Station;
-import org.trafficdrone.exchange.postion.PositionRequest;
-import org.trafficdrone.exchange.report.TrafficConditions;
-import org.trafficdrone.exchange.report.TrafficReport;
-import org.trafficdrone.exchange.report.TrafficReportChannel;
+import org.trafficdrone.data.model.DronePosition;
+import org.trafficdrone.data.model.Station;
+import org.trafficdrone.exchange.TrafficReportChannel;
+import org.trafficdrone.report.TrafficConditions;
+import org.trafficdrone.report.TrafficReport;
 
 import com.javadocmd.simplelatlng.LatLng;
 import com.javadocmd.simplelatlng.LatLngTool;
@@ -45,7 +45,7 @@ public class Drone {
 
 	private volatile boolean threadDone = false;
 	
-	private final BlockingQueue<PositionRequest> positionsQueue = new ArrayBlockingQueue<>(10);
+	private final BlockingQueue<DronePosition> positionsQueue = new ArrayBlockingQueue<>(10);
 	
 	private TrafficReportChannel reportChannel;
 	
@@ -94,9 +94,9 @@ public class Drone {
 		return id;
 	}
 
-	public void receivePosition(PositionRequest positionRequest) {
+	public void receivePosition(DronePosition dronePosition) {
 		try {
-			positionsQueue.put(positionRequest);
+			positionsQueue.put(dronePosition);
 		} catch (InterruptedException e) {
 			// Do not throw exception here. Just skipping.
 			logger.error("Drone " + id + ": error inserting position request into queue", e);
@@ -136,22 +136,22 @@ public class Drone {
                     	
                     	// Drone just started. Getting initial position.
                     	if (position == null) {
-                    		PositionRequest positionRequest = positionsQueue.poll();
-                    		if (positionRequest == null) {
+                    		DronePosition dronePosition = positionsQueue.poll();
+                    		if (dronePosition == null) {
                     			continue;
                     		}
-                    		if (positionRequest.isShutdown()) {
+                    		if (dronePosition.isShutdown()) {
                     			threadDone = true;
                     			continue;
                     		}
-                			position = Position.of(positionRequest.getPosition().getLatitude(), positionRequest.getPosition().getLongitude());
+                			position = Position.of(dronePosition.getPosition().getLatitude(), dronePosition.getPosition().getLongitude());
                 			// Check if there are stations nearby for just set position
                 			checkNearbyStationsAndReport();
                     	}
                     	
                     	// position is not null at this point. Drone is not moving and waiting for the next position
                     	if (nextPosition == null) {
-                    		PositionRequest positionRequest = positionsQueue.poll();
+                    		DronePosition positionRequest = positionsQueue.poll();
                     		if (positionRequest == null) {
                     			continue;
                     		}
@@ -225,6 +225,7 @@ public class Drone {
 			this.dronId = dronId; 
 		}
 		
+		// Movement is simulated by calculating time of arrival to destination and scheduling call of reachPosition method. 
 		public void moveTo(Position currentPosition, Position newPosition, double speed) {
 			positionReached = false;
 			LatLng current = new LatLng(currentPosition.getLatitude(), currentPosition.getLongitude());

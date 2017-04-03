@@ -10,10 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.Lifecycle;
-import org.trafficdrone.data.PositionRequests;
-import org.trafficdrone.exchange.postion.PositionChannel;
-import org.trafficdrone.exchange.postion.PositionRequest;
-import org.trafficdrone.exchange.report.TrafficReport;
+import org.trafficdrone.data.DronePositionsLoader;
+import org.trafficdrone.data.model.DronePosition;
+import org.trafficdrone.exchange.PositionChannel;
+import org.trafficdrone.report.TrafficReport;
 
 
 public class Dispatcher implements Lifecycle {
@@ -24,7 +24,7 @@ public class Dispatcher implements Lifecycle {
 	
 	private List<PositionChannel> droneChannels;
 	
-	private final PositionRequests positionRequests;
+	private final DronePositionsLoader dronePositionsLoader;
 	
 	private final LocalTime stopTime;
 	
@@ -34,8 +34,8 @@ public class Dispatcher implements Lifecycle {
 	
 	private Object lifecycleMonitor = new Object();
 	
-	public Dispatcher(PositionRequests positionRequests, LocalTime stopTime) {
-		this.positionRequests = positionRequests;
+	public Dispatcher(DronePositionsLoader dronePositionsLoader, LocalTime stopTime) {
+		this.dronePositionsLoader = dronePositionsLoader;
 		this.stopTime = stopTime;
 	}
 	
@@ -88,10 +88,10 @@ public class Dispatcher implements Lifecycle {
 		droneChannels.forEach(channel -> {
 			CompletableFuture.runAsync(() -> {
 				try {
-					positionRequests.getAllByDroneId(channel.getDroneId())
+					dronePositionsLoader.getAllByDroneId(channel.getDroneId())
 						.filter(position -> position.getTimestamp().toLocalTime().isBefore(stopTime))
 						.forEach(position -> channel.sendPosition(position));
-					channel.sendPosition(PositionRequest.shutdownRequest(channel.getDroneId()));
+					channel.sendPosition(DronePosition.shutdownRequest(channel.getDroneId()));
 				} catch (Exception e) {
 					logger.error("Error sending position data", e);
 					droneShutdownLatch.countDown();
@@ -114,5 +114,9 @@ public class Dispatcher implements Lifecycle {
 	@Override
 	public String toString() {
 		return "Dispatcher [droneChannels=" + droneChannels + ", stopTime=" + stopTime + "]";
+	}
+
+	public List<TrafficReport> getReports() {
+		return reports;
 	}
 }
