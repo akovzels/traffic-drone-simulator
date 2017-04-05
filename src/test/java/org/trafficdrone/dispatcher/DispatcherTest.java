@@ -47,7 +47,7 @@ public class DispatcherTest {
 	public void testDispather() throws InterruptedException {
 		
 		when(dronePositionsLoader.getAllByDroneId(DRONEID)).thenReturn(getTestDronPositionsStream());
-		Mockito.doNothing().when(droneChannel).sendPosition(Mockito.any());
+		Mockito.doNothing().when(droneChannel).sendPosition(ArgumentMatchers.any());
 		
 		dispatcher.start();
 		
@@ -65,7 +65,7 @@ public class DispatcherTest {
 	public void testDispatherReceiveReport() throws InterruptedException {
 		
 		when(dronePositionsLoader.getAllByDroneId(DRONEID)).thenReturn(getTestDronPositionsStream());
-		Mockito.doNothing().when(droneChannel).sendPosition(Mockito.any());
+		Mockito.doNothing().when(droneChannel).sendPosition(ArgumentMatchers.any());
 		
 		dispatcher.start();
 		

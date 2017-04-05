@@ -25,10 +25,10 @@ public class DroneTest {
 	private static final Logger logger = LoggerFactory.getLogger(DroneTest.class);
 	
 	private static final long DRONEID = 1L;
-	private static double CSUISING_SPEED = 100;
+	private static final double CSUISING_SPEED = 100;
 	
 	private static final List<Station> STATIONS = Arrays.asList(
-			new Station("Cradle of History", Position.of(36.15008,-5.3492362)), 
+			new Station("Cradle of History", Position.of(36.15008, -5.3492362)), 
 			new Station("St. Paul's Church", Position.of(36.146576, -5.355759)), 
 			new Station("American War Memorial", Position.of(36.143337, -5.354429)), 
 			new Station("King's Bastion", Position.of(36.139655, -5.354949))); 
@@ -66,7 +66,7 @@ public class DroneTest {
 			Object[] args = invocation.getArguments();
 			logger.info("sendReport {}", args);
 			return null;
-		}).when(reportChannel).sendReport(Mockito.any());
+		}).when(reportChannel).sendReport(ArgumentMatchers.any());
 		
 		// Assume that DRONE_COORDINATES has size > 1
 		totalDistance = 0;
