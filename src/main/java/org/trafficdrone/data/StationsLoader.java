@@ -16,11 +16,7 @@ public class StationsLoader extends CSVResourceReader {
 	 */
 	public List<Station> getAll() {
 		return reader.readFromResource(STATIONS_RESOURCE, 
-				line -> {
-					Station station = new Station();
-					station.setName(line[0]);
-					station.setPosition(Position.of(Double.parseDouble(line[1]), Double.parseDouble(line[2])));
-					return station;
-				}).collect(Collectors.toList());
+				line -> new Station(line[0], Position.of(Double.parseDouble(line[1]), Double.parseDouble(line[2])))
+			).collect(Collectors.toList());
 	}
 }

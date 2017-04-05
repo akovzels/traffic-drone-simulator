@@ -11,17 +11,13 @@ public class PositionChannel {
 		this.drone = drone;
 	}
 	
-	public Long getDroneId() {
-		return drone.getId();
-	}
-	
 	public void sendPosition(DronePosition position) {
 		drone.receivePosition(position);
 	}
 
 	@Override
 	public String toString() {
-		return "PositionChannel [droneId=" + getDroneId() + "]";
+		return "PositionChannel [droneId=" + drone.getId() + "]";
 	}
 
 }

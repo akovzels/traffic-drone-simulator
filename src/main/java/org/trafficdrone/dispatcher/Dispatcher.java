@@ -1,14 +1,15 @@
 package org.trafficdrone.dispatcher;
 
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.Lifecycle;
 import org.trafficdrone.data.DronePositionsLoader;
 import org.trafficdrone.data.model.DronePosition;
@@ -22,8 +23,8 @@ public class Dispatcher implements Lifecycle {
 	
 	private final List<TrafficReport> reports = new LinkedList<>();
 	
-	private List<PositionChannel> droneChannels;
-	
+	private Map<Long, PositionChannel> droneChannels = new HashMap<>();
+		
 	private final DronePositionsLoader dronePositionsLoader;
 	
 	private final LocalTime stopTime;
@@ -37,6 +38,10 @@ public class Dispatcher implements Lifecycle {
 	public Dispatcher(DronePositionsLoader dronePositionsLoader, LocalTime stopTime) {
 		this.dronePositionsLoader = dronePositionsLoader;
 		this.stopTime = stopTime;
+	}
+	
+	public void addDroneChannel(Long droneId, PositionChannel droneChannel) {
+		droneChannels.put(droneId, droneChannel);
 	}
 	
 	public void receiveReport(TrafficReport report) {
@@ -76,22 +81,17 @@ public class Dispatcher implements Lifecycle {
 		}
 	}
 
-	@Autowired
-	public void setDroneChannels(List<PositionChannel> droneChannels) {
-		this.droneChannels = droneChannels;
-	}
-	
 	private void startDispatching() {
 		
 		droneShutdownLatch = new CountDownLatch(droneChannels.size());
 		
-		droneChannels.forEach(channel -> {
+		droneChannels.forEach((droneId, channel) -> {
 			CompletableFuture.runAsync(() -> {
 				try {
-					dronePositionsLoader.getAllByDroneId(channel.getDroneId())
+					dronePositionsLoader.getAllByDroneId(droneId)
 						.filter(position -> position.getTimestamp().toLocalTime().isBefore(stopTime))
 						.forEach(position -> channel.sendPosition(position));
-					channel.sendPosition(DronePosition.shutdownRequest(channel.getDroneId()));
+					channel.sendPosition(DronePosition.shutdownRequest(droneId));
 				} catch (Exception e) {
 					logger.error("Error sending position data", e);
 					droneShutdownLatch.countDown();

@@ -1,5 +1,9 @@
 package org.trafficdrone;
 
+import com.javadocmd.simplelatlng.LatLng;
+import com.javadocmd.simplelatlng.LatLngTool;
+import com.javadocmd.simplelatlng.util.LengthUnit;
+
 /**
  * Geographic coordinates expressed in latitude and longitude 
  *
@@ -18,6 +22,10 @@ public class Position {
 		pos.latitude = latitude;
 		pos.longitude = longitude;
 		return pos;
+	}
+	
+	public final double distanceTo(Position other) {
+		return LatLngTool.distance(new LatLng(latitude, longitude), new LatLng(other.getLatitude(), other.getLongitude()), LengthUnit.METER);
 	}
 
 	public double getLatitude() {

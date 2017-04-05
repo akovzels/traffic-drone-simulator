@@ -1,14 +1,16 @@
 package org.trafficdrone.dispatcher;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.stream.Stream;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -38,14 +40,13 @@ public class DispatcherTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		dispatcher = new Dispatcher(dronePositionsLoader, LocalTime.of(HOUR, 55));
-		dispatcher.setDroneChannels(Collections.singletonList(droneChannel));
+		dispatcher.addDroneChannel(DRONEID, droneChannel);
 	}
 	
 	@Test
 	public void testDispather() throws InterruptedException {
 		
 		when(dronePositionsLoader.getAllByDroneId(DRONEID)).thenReturn(getTestDronPositionsStream());
-		when(droneChannel.getDroneId()).thenReturn(DRONEID);
 		Mockito.doNothing().when(droneChannel).sendPosition(Mockito.any());
 		
 		dispatcher.start();
@@ -64,7 +65,6 @@ public class DispatcherTest {
 	public void testDispatherReceiveReport() throws InterruptedException {
 		
 		when(dronePositionsLoader.getAllByDroneId(DRONEID)).thenReturn(getTestDronPositionsStream());
-		when(droneChannel.getDroneId()).thenReturn(DRONEID);
 		Mockito.doNothing().when(droneChannel).sendPosition(Mockito.any());
 		
 		dispatcher.start();
@@ -73,10 +73,13 @@ public class DispatcherTest {
 		
 		dispatcher.receiveReport(buildTrafficReport(DRONEID, TrafficConditions.HEAVY));
 		dispatcher.receiveReport(buildTrafficReport(DRONEID, TrafficConditions.MODERATE));
+		dispatcher.receiveReport(buildTrafficReport(DRONEID, TrafficConditions.LIGHT));
 		dispatcher.receiveReport(TrafficReport.shutdownReport(DRONEID));
 		
 		dispatcher.stop();
 	
+		assertThat(dispatcher.getReports(), Matchers.hasSize(3));
+		assertThat(dispatcher.getReports().get(0).getConditions(), is(TrafficConditions.HEAVY));
 		
 	}
 	

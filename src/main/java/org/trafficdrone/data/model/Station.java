@@ -4,24 +4,22 @@ import org.trafficdrone.Position;
 
 public class Station {
 	
-	private String name;
+	private final String name;
 	
-	private Position position;
+	private final Position position;
+
+	public Station(String name, Position position) {
+		super();
+		this.name = name;
+		this.position = position;
+	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public Position getPosition() {
 		return position;
-	}
-
-	public void setPosition(Position position) {
-		this.position = position;
 	}
 
 	@Override

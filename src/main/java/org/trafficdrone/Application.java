@@ -3,6 +3,7 @@ package org.trafficdrone;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -56,20 +57,15 @@ public class Application {
 	public TrafficReportChannel reportChannel() {
 		return new TrafficReportChannel(dispatcher());
 	}
-	
-	@Bean
-	public PositionChannel drone1Channel() {
-		return new PositionChannel(drone1());		
-	}
-	
-	@Bean
-	public PositionChannel drone2Channel() {
-		return new PositionChannel(drone2());		
-	}
-	
+
 	@Bean
 	public Dispatcher dispatcher() {
 		return new Dispatcher(new DronePositionsLoader(), LocalTime.of(8, 10));
 	}
-
+	
+	@Autowired
+	public void registerPositionChannels(List<Drone> drones, Dispatcher dispatcher) {
+		drones.forEach(drone -> dispatcher.addDroneChannel(drone.getId(), new PositionChannel(drone)));
+	}
+	
 }
