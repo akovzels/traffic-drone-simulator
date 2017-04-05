@@ -3,19 +3,20 @@ package org.trafficdrone;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.trafficdrone.data.PositionRequests;
-import org.trafficdrone.data.Station;
-import org.trafficdrone.data.Stations;
+import org.trafficdrone.data.DronePositionsLoader;
+import org.trafficdrone.data.StationsLoader;
+import org.trafficdrone.data.model.Station;
 import org.trafficdrone.dispatcher.Dispatcher;
 import org.trafficdrone.drone.Drone;
-import org.trafficdrone.exchange.postion.PositionChannel;
-import org.trafficdrone.exchange.report.TrafficReportChannel;
+import org.trafficdrone.exchange.PositionChannel;
+import org.trafficdrone.exchange.TrafficReportChannel;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
@@ -39,7 +40,7 @@ public class Application {
 	
 	@Bean
 	public List<Station> stationLocations() {
-		return new Stations().getAll();
+		return new StationsLoader().getAll();
 	}
 	
 	@Bean
@@ -56,20 +57,15 @@ public class Application {
 	public TrafficReportChannel reportChannel() {
 		return new TrafficReportChannel(dispatcher());
 	}
-	
-	@Bean
-	public PositionChannel drone1Channel() {
-		return new PositionChannel(drone1());		
-	}
-	
-	@Bean
-	public PositionChannel drone2Channel() {
-		return new PositionChannel(drone2());		
-	}
-	
+
 	@Bean
 	public Dispatcher dispatcher() {
-		return new Dispatcher(new PositionRequests(), LocalTime.of(8, 10));
+		return new Dispatcher(new DronePositionsLoader(), LocalTime.of(8, 10));
 	}
-
+	
+	@Autowired
+	public void registerPositionChannels(List<Drone> drones, Dispatcher dispatcher) {
+		drones.forEach(drone -> dispatcher.addDroneChannel(drone.getId(), new PositionChannel(drone)));
+	}
+	
 }

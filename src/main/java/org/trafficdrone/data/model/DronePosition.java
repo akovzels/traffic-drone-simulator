@@ -1,10 +1,10 @@
-package org.trafficdrone.exchange.postion;
+package org.trafficdrone.data.model;
 
 import java.time.LocalDateTime;
 
 import org.trafficdrone.Position;
 
-public class PositionRequest {
+public class DronePosition {
 
 	private long droneId;
 
@@ -14,11 +14,18 @@ public class PositionRequest {
 
 	private boolean shutdown;
 
-	public static final PositionRequest shutdownRequest(Long droneId) {
-		PositionRequest request = new PositionRequest();
-		request.setDroneId(droneId);
-		request.setShutdown(true);
-		return request;
+	public static final DronePosition shutdownRequest(Long droneId) {
+		DronePosition dronePosition = new DronePosition();
+		dronePosition.setDroneId(droneId);
+		dronePosition.setShutdown(true);
+		return dronePosition;
+	}
+	
+	public static final DronePosition at(Long droneId, Position position) {
+		DronePosition dronePosition = new DronePosition();
+		dronePosition.setDroneId(droneId);
+		dronePosition.setPosition(position);
+		return dronePosition;
 	}
 
 	public long getDroneId() {
@@ -55,7 +62,7 @@ public class PositionRequest {
 
 	@Override
 	public String toString() {
-		return "PositionRequest [droneId=" + droneId + ", position=" + position + ", timestamp=" + timestamp + ", shutdown=" + shutdown + "]";
+		return "DronePosition [droneId=" + droneId + ", position=" + position + ", timestamp=" + timestamp + ", shutdown=" + shutdown + "]";
 	}
 
 }

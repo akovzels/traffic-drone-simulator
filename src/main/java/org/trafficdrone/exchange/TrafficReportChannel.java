@@ -1,6 +1,7 @@
-package org.trafficdrone.exchange.report;
+package org.trafficdrone.exchange;
 
 import org.trafficdrone.dispatcher.Dispatcher;
+import org.trafficdrone.report.TrafficReport;
 
 public class TrafficReportChannel {
 
